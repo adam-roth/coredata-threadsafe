@@ -13,6 +13,7 @@
 		66F7E52715899D8B005641C7 /* IAThreadSafeContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 66F7E52315899D8B005641C7 /* IAThreadSafeContext.m */; };
 		66F7E52815899D8B005641C7 /* IAThreadSafeManagedObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 66F7E52415899D8B005641C7 /* IAThreadSafeManagedObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		66F7E52915899D8B005641C7 /* IAThreadSafeManagedObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 66F7E52515899D8B005641C7 /* IAThreadSafeManagedObject.m */; };
+		66F7E5301589A92A005641C7 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 66F7E52F1589A92A005641C7 /* CoreData.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,7 @@
 		66F7E52315899D8B005641C7 /* IAThreadSafeContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IAThreadSafeContext.m; sourceTree = "<group>"; };
 		66F7E52415899D8B005641C7 /* IAThreadSafeManagedObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IAThreadSafeManagedObject.h; sourceTree = "<group>"; };
 		66F7E52515899D8B005641C7 /* IAThreadSafeManagedObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IAThreadSafeManagedObject.m; sourceTree = "<group>"; };
+		66F7E52F1589A92A005641C7 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +34,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				66F7E5301589A92A005641C7 /* CoreData.framework in Frameworks */,
 				66F7E51415899CF8005641C7 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -59,6 +62,7 @@
 		66F7E51215899CF8005641C7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				66F7E52F1589A92A005641C7 /* CoreData.framework */,
 				66F7E51315899CF8005641C7 /* Foundation.framework */,
 			);
 			name = Frameworks;
