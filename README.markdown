@@ -27,7 +27,7 @@ To use this framework, you must do two things:
 
 If you use this code, you should be aware that *at least* the following caveats/limitations have been identified.  It is in your own best interest to heed them:
 
-1.  All entities in the data model **must** inherit from 'IAThreadSafeManagedObject'.  Inheriting directly from NSManagedObject is not acceptable and WILL crash the app.  Either every entity is thread-safe, or none of them are.
+1.  All entities in the data model **must** inherit from `IAThreadSafeManagedObject`.  Inheriting directly from `NSManagedObject` is not acceptable and **will** crash the app.  Either every entity is thread-safe, or none of them are.
 
 2.  You **must** use `IAThreadSafeContext` instead of `NSManagedObjectContext`.  If you don't do this then there is no point in using `IAThreadSafeManagedObject` (and vice-versa).  You need to use the two classes together, or not at all.  
 
