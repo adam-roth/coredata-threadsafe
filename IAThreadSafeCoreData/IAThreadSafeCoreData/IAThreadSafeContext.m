@@ -168,7 +168,7 @@
     }
     @synchronized(self) {
         //execute the call on the correct thread for this context
-        NSInvocation* call = [self invocationWithSelector:@selector(objectID) andArg:objectID];
+        NSInvocation* call = [self invocationWithSelector:@selector(objectWithID:) andArg:objectID];
         return [self runInvocationReturningObject:call];
     }
 }
