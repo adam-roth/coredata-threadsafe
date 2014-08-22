@@ -61,10 +61,7 @@ void dynamicSetter(id self, SEL _cmd, id obj) {
     if (! [self myThread] || [NSThread currentThread] == [self myThread]) {
         //okay to execute
         //XXX:  clunky way to get the property name, but meh...
-        NSString* targetSel = NSStringFromSelector(_cmd);
-        NSString* propertyNameUpper = [targetSel substringFromIndex:3];  //remove the 'set'
-        NSString* firstLetter = [[propertyNameUpper substringToIndex:1] lowercaseString];
-        NSString* propertyName = [NSString stringWithFormat:@"%@%@", firstLetter, [propertyNameUpper substringFromIndex:1]];
+        NSString* propertyName = [[self class] propertyNameFromSetter:_cmd];
         propertyName = [propertyName substringToIndex:[propertyName length] - 1];
         
         //NSLog(@"Setting property:  name=%@", propertyName);
@@ -88,12 +85,46 @@ void dynamicSetter(id self, SEL _cmd, id obj) {
     }
 }
 
++ (NSArray*)declaredPropertyNames {
+    NSMutableArray* properties = [NSMutableArray array];
+    
+    unsigned int numProperties = 0;
+    objc_property_t* objcProps = class_copyPropertyList([self class], &numProperties);
+    for (int index = 0; index < numProperties; index++) {
+        objc_property_t prop = objcProps[index];
+        const char* name = property_getName(prop);
+        if (name) {
+            [properties addObject:[NSString stringWithCString:name encoding:[NSString defaultCStringEncoding]]];
+        }
+        else {
+            NSLog(@"Found an unnamed property...?");
+        }
+    }
+    free(objcProps);
+    
+    return properties;
+}
+
++ (NSString*)propertyNameFromSetter:(SEL)selector {
+    //XXX:  clunky way to get the property name, but meh...
+    NSString* targetSel = NSStringFromSelector(selector);
+    NSString* propertyNameUpper = [targetSel substringFromIndex:3];  //remove the 'set'
+    NSString* firstLetter = [[propertyNameUpper substringToIndex:1] lowercaseString];
+    NSString* propertyName = [NSString stringWithFormat:@"%@%@", firstLetter, [propertyNameUpper substringFromIndex:1]];
+    propertyName = [propertyName substringToIndex:[propertyName length] - 1];   //remove the trailing ':'
+    
+    return propertyName;
+}
+
 + (BOOL) resolveInstanceMethod:(SEL)sel {
     NSString* targetSel = NSStringFromSelector(sel);
-    if ([targetSel hasPrefix:@"set"] && [targetSel rangeOfString:@"Primitive"].location == NSNotFound) {
-        NSLog(@"Overriding selector:  %@", targetSel);
-        class_addMethod([self class], sel, (IMP)dynamicSetter, "v@:@");
-        return YES;
+    if ([targetSel hasPrefix:@"set"] && [targetSel rangeOfString:@"Primitive"].location == NSNotFound && [targetSel rangeOfString:@":"].location != NSNotFound) {
+        NSString* propertyName = [self propertyNameFromSetter:sel];
+        if ([[self declaredPropertyNames] containsObject:propertyName]) {
+            NSLog(@"Overriding selector:  %@", targetSel);
+            class_addMethod([self class], sel, (IMP)dynamicSetter, "v@:@");
+            return YES;
+        }
     }
     
     return [super resolveInstanceMethod:sel];
