@@ -61,8 +61,7 @@ void dynamicSetter(id self, SEL _cmd, id obj) {
     if (! [self myThread] || [NSThread currentThread] == [self myThread]) {
         //okay to execute
         //XXX:  clunky way to get the property name, but meh...
-        NSString* propertyName = [[self class] propertyNameFromSetter:_cmd];
-        propertyName = [propertyName substringToIndex:[propertyName length] - 1];
+        NSString* propertyName = [[self class] c:_cmd];
         
         //NSLog(@"Setting property:  name=%@", propertyName);
         
