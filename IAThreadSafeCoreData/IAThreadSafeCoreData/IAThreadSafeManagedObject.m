@@ -6,6 +6,7 @@
 //
 
 #import "IAThreadSafeManagedObject.h"
+#import "IAThreadSafeContext.h"
 #import <objc/runtime.h>
 
 void dynamicSetter(id self, SEL _cmd, id obj);
@@ -31,11 +32,23 @@ void dynamicSetter(id self, SEL _cmd, id obj);
 }
 
 - (void) awakeFromInsert {
-    myThread = [NSThread currentThread];
+    if (self.managedObjectContext && [[self managedObjectContext] isKindOfClass:[IAThreadSafeContext class]]) {
+        IAThreadSafeContext* parentContext = (IAThreadSafeContext*)self.managedObjectContext;
+        myThread = [parentContext backingThread];
+    }
+    else {
+        myThread = [NSThread currentThread];
+    }
 }
 
 - (void) awakeFromFetch {
-    myThread = [NSThread currentThread];
+    if (self.managedObjectContext && [[self managedObjectContext] isKindOfClass:[IAThreadSafeContext class]]) {
+        IAThreadSafeContext* parentContext = (IAThreadSafeContext*)self.managedObjectContext;
+        myThread = [parentContext backingThread];
+    }
+    else {
+        myThread = [NSThread currentThread];
+    }
 }
 
 - (NSThread*) myThread {
