@@ -6,6 +6,8 @@
 //
 #import "IAThreadSafeContext.h"
 
+static NSThread* backThread = nil;
+
 @implementation IAThreadSafeContext
 
 //XXX:  the following methods are not remapped to the originating thread
@@ -19,27 +21,79 @@
 //          undoManager
 //          userInfo
 
+- (NSThread*)backingThread {
+    return myThread;
+}
+ 
+-(void)backThreadIdle {
+    //no-op
+}
+
+- (void)backThreadInit {
+    //XXX:  GCD is somewhat problematic in that it does not guarantee thread affinity or persistence for any thread(s) other than 
+    //      main.  In practice this means that if a thread-safe context is allocated within a block that was dispatched through GCD onto
+    //      any queue other than main, there is a possibility that the GCD-managed thread will terminate even though the context is
+    //      still is use; this causes a crash if/when it occurs
+    //
+    //      So...to work around this problem we spin up a persistent background thread, and delegate to it whenever a thread-safe context
+    //      is allocated outside of the main thread.  Note that this may reduce performance in some cases (i.e. two or more background contexts that
+    //      are both/all working on very large/time-consuming queries), however it does allow safe usage within GCD.  The performance impacts
+    //      could be mitigated by managing a pool of background threads, although that may be overkill in most cases.
+    NSRunLoop* runLoop = [NSRunLoop currentRunLoop];
+    
+    NSTimer* timer = [NSTimer timerWithTimeInterval:10.0 target:self selector:@selector(backThreadIdle) userInfo:nil repeats:YES];//[NSTimer scheduledTimerWithTimeInterval:10.0 target:self selector:@selector(backThreadIdle) userInfo:nil repeats:YES];
+    [runLoop addTimer:timer forMode:NSDefaultRunLoopMode];
+    
+    [runLoop run];
+}
 
 //constructors
 - (id) init {
+    @synchronized([IAThreadSafeContext class]) {
+        if (! backThread) {
+            backThread = [[NSThread alloc] initWithTarget:self selector:@selector(backThreadInit) object:nil];
+            backThread.name = @"db_persistent_background_thread";
+            
+            [backThread start];
+        }
+    }
+
     if (self = [super init]) {
-        myThread = [NSThread currentThread];
+        myThread = [NSThread isMainThread] ? [NSThread currentThread] : backThread;
     }
     
     return self;
 }
 
 - (id) initWithCoder:(NSCoder *)aDecoder {
+    @synchronized([IAThreadSafeContext class]) {
+        if (! backThread) {
+            backThread = [[NSThread alloc] initWithTarget:self selector:@selector(backThreadInit) object:nil];
+            backThread.name = @"db_persistent_background_thread";
+            
+            [backThread start];
+        }
+    }
+
     if (self = [super initWithCoder:aDecoder]) {
-        myThread = [NSThread currentThread];
+        myThread = [NSThread isMainThread] ? [NSThread currentThread] : backThread;
     }
     
     return self;
 }
 
 - (id) initWithConcurrencyType:(NSManagedObjectContextConcurrencyType)ct {
+    @synchronized([IAThreadSafeContext class]) {
+        if (! backThread) {
+            backThread = [[NSThread alloc] initWithTarget:self selector:@selector(backThreadInit) object:nil];
+            backThread.name = @"db_persistent_background_thread";
+            
+            [backThread start];
+        }
+    }
+
     if (self = [super initWithConcurrencyType:ct]) {
-        myThread = [NSThread currentThread];
+        myThread = [NSThread isMainThread] ? [NSThread currentThread] : backThread;
     }
     
     return self;
