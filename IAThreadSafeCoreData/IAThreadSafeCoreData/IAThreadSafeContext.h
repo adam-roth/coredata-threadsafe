@@ -14,4 +14,6 @@
     NSThread* myThread;
 }
 
+//- (NSThread*)backingThread;
+
 @end
